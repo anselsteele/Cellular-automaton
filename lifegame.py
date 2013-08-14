@@ -2,6 +2,12 @@ from Tkinter import *
 import curses
 import time
 
+scrn = curses.initscr()
+curses.noecho()
+curses.cbreak()
+scrn.keypad(1)
+scrn.nodelay(1)
+
 maplist = []
 
 def clicker(event):
@@ -17,6 +23,7 @@ def clicker(event):
 			maplist.insert(listposit,squpdate)
 
 master = Tk()
+master.attributes('-topmost', 1)
 cvs = Canvas(master,width = 700,height = 700)
 cvs.pack()
 cvs.bind('<Button-1>',clicker)
@@ -32,12 +39,28 @@ while xcounter < 35:
 		maplist.append(mapitem)
 		ycounter = ycounter + 1
 	xcounter = xcounter + 1
+done = False
+while done == False:
+	cvs.update()
+	c = scrn.getch()
+	if c== 32:
+		done = True
+	for thing in maplist:
+		xthing = thing[0]
+		ything = thing[1]
+		life = thing[2]
+		if life == 1:
+			cvs.create_rectangle(xthing,ything,xthing+20,ything+20,fill = 'black')
+		if life == 0:
+			cvs.create_rectangle(xthing,ything,xthing+20,ything+20,fill = 'white')
+
 while True:
 	cvs.update()
 	cvs.delete(ALL)
 	neighborlist = []
 
 	for thing in maplist:
+		thingpoint = maplist.index(thing)
 		neighbors = 0
 		xposit = thing[0]
 		yposit = thing[1]
@@ -50,8 +73,9 @@ while True:
 			ytotal = yposit - ycoords
 			if -20 <= xtotal <= 20 and -20 <= ytotal <= 20 and itemlife == 1:
 				neighbors = neighbors + 1
+			elif xtotal < -21 and ytotal < -21:
+				break
 		neighborlist.append(neighbors)
-		print neighborlist
 
 	for thing in maplist:
 		xthing = thing[0]
@@ -72,8 +96,6 @@ while True:
 		maplist.remove(thing)
 		squpdate = [xthing,ything,living]
 		maplist.insert(listposit,squpdate)
-
-
 
 	for thing in maplist:
 		xthing = thing[0]
